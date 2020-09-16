@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 set -e
 
+# add aws secretsmanager commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+
 # arguments required for awscli to work with wasabi
 wasabi_cmd_suffix="--profile wasabi --endpoint-url=https://s3.wasabisys.com"
 
