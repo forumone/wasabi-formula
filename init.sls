@@ -4,18 +4,11 @@ jq:
     - name: jq
 
 # List of directories to back up
-# First, empty the file
-blank-wasabi:
-  cmd.run:
-    - name: '> /etc/wasabi-backup.txt'
-
-# Add our paths from pillar
-{% for path in pillar['wasabi']['paths'] %}
-wasabi-{{path}}:
-  file.append:
+wasabi-backup:
+  file.managed:
     - name: /etc/wasabi-backup.txt
-    - text: {{ path }}
-{% endfor %}
+    - source: salt://wasabi/files/wasabi-backup.tpl
+    - template: jinja
 
 # rsync / db dump script
 /opt/wasabi/bin:
