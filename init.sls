@@ -4,6 +4,11 @@ set_wasabi_grain:
     - name: roles
     - value: wasabi
 
+# install jq
+jq:
+  pkg.installed:
+    - name: jq
+
 # List of directories to back up
 # First, empty the file
 blank-wasabi:
