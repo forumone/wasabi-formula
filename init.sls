@@ -1,9 +1,3 @@
-# Set a grain
-set_wasabi_grain:
-  grains.list_present:
-    - name: roles
-    - value: wasabi
-
 # install jq
 jq:
   pkg.installed:
