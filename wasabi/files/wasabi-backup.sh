@@ -58,7 +58,7 @@ do
         source=$(realpath "$line")
         if [ -d "$source" ] && [ -x "$source" ];
         then
-            aws s3 sync "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} 2>&1 1>/dev/null | logger "$now" "$source" backup SUCCESS || logger "$source" backup ERROR
+            aws s3 sync "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} 2>&1 1>/dev/null && logger "$now" "$source" backup SUCCESS || logger "$source" backup ERROR
         fi
     fi
 done < $input
