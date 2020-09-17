@@ -13,7 +13,7 @@ then
 fi
 
 # arguments required for awscli to work with wasabi
-wasabi_cmd_suffix="--profile wasabi --endpoint-url=https://s3.wasabisys.com"
+wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 
 # name of wasabi bucket
 bucket="examplebucket"
@@ -56,7 +56,7 @@ do
    source=$(realpath "$line")
     if [ -d "$source" ] && [ -x "$source" ];
     then
-        aws s3 sync --dryrun "$source" s3://"${bucket}${source}" "${wasabi_cmd_suffix}" | logger "$now" "$source" backup SUCCESS || logger "$source" backup FAILED
+        aws s3 sync --dryrun "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} | logger "$now" "$source" backup SUCCESS || logger "$source" backup FAILED
     fi
 done < $input
 
