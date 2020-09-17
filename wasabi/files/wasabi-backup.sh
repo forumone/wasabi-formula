@@ -58,7 +58,7 @@ do
         source=$(realpath "$line")
         if [ -d "$source" ] && [ -x "$source" ];
         then
-            aws s3 sync --dryrun "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} | logger "$now" "$source" backup SUCCESS || logger "$source" backup FAILED
+            aws s3 sync "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} 2>&1 1>/dev/null | logger "$now" "$source" backup SUCCESS || logger "$source" backup ERROR
         fi
     fi
 done < $input
