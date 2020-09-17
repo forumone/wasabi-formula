@@ -24,6 +24,7 @@ wasabi-backup:
     - group: root
     - mode: 750
     - source: salt://wasabi/files/wasabi-backup.sh
+    - template: jinja
     - require:
       - file: /opt/wasabi/bin
 

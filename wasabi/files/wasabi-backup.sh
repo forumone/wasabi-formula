@@ -16,7 +16,7 @@ fi
 wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 
 # name of wasabi bucket
-bucket="examplebucket"
+bucket="{{ pillar['wasabi']['bucket'] }}"
 
 # file containing paths to backup, one per line.
 input="/etc/wasabi-backup.txt"
