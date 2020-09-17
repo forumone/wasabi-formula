@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -exuo pipefail
+set -eo pipefail
 
 # add aws secretsmanager commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 AWS_SECRET_ACCESS_KEY=$(aws secretsmanager get-secret-value --secret-id WASABI_SECRET_ACCESS_KEY --region us-east-1 | jq -r .SecretString) && export AWS_SECRET_ACCESS_KEY
