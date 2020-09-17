@@ -1,5 +1,6 @@
 wasabi:
   dumpdbs: True
+  bucket: name_of_wasabi_bucket
   paths: 
     - /var/www/vhosts
     - /etc/
