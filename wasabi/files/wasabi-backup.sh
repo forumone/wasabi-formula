@@ -53,10 +53,13 @@ fi
 # read paths from file, run aws sync against every valid path.
 while IFS= read -r line
 do
-   source=$(realpath "$line")
-    if [ -d "$source" ] && [ -x "$source" ];
+    if [[ ! -z ${line} ]];
     then
-        aws s3 sync --dryrun "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} | logger "$now" "$source" backup SUCCESS || logger "$source" backup FAILED
+        source=$(realpath "$line")
+        if [ -d "$source" ] && [ -x "$source" ];
+        then
+            aws s3 sync --dryrun "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} | logger "$now" "$source" backup SUCCESS || logger "$source" backup FAILED
+        fi
     fi
 done < $input
 
