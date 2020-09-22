@@ -7,7 +7,7 @@ jq:
 wasabi-backup:
   file.managed:
     - name: /etc/wasabi-backup.txt
-    - source: salt://wasabi/files/wasabi-backup.tpl
+    - source: salt://wasabi/files/wasabi-daily.tpl
     - template: jinja
 
 # rsync / db dump script
@@ -18,12 +18,12 @@ wasabi-backup:
     - mode: 755
     - makedirs: True
 
-/opt/wasabi/bin/wasabi-backup.sh:
+/opt/wasabi/bin/wasabi-daily.sh:
   file.managed:
     - user: root
     - group: root
     - mode: 750
-    - source: salt://wasabi/files/wasabi-backup.sh
+    - source: salt://wasabi/files/wasabi-daily.sh
     - template: jinja
     - require:
       - file: /opt/wasabi/bin
@@ -31,23 +31,23 @@ wasabi-backup:
 # cron entry to run script
 #  Enable DB dumps if rsync:dumpdbs is True. Set a default False value if doesn't exist
 {% if salt['pillar.get']('wasabi:dumpdbs', False) %}
-/opt/wasabi/bin/wasabi-backup.sh dumpdbs 2>&1 | logger -t backups:
+/opt/wasabi/bin/wasabi-daily.sh dumpdbs 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup
+    - identifier: wasabibackup-daily
     - user: root
     - minute: random
     - hour: 2
 {% elif 'mysql' in salt['grains.get']('roles', 'roles:none') %}
-/opt/wasabi/bin/wasabi-backup.sh dumpdbs 2>&1 | logger -t backups:
+/opt/wasabi/bin/wasabi-daily.sh dumpdbs 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup
+    - identifier: wasabibackup-daily
     - user: root
     - minute: random
     - hour: 2
 {% else %}
-/opt/wasabi/bin/wasabi-backup.sh 2>&1 | logger -t backups:
+/opt/wasabi/bin/wasabi-daily.sh 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup
+    - identifier: wasabibackup-daily
     - user: root
     - minute: random
     - hour: 2
