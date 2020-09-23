@@ -15,7 +15,7 @@ fi
 # arguments required for awscli to work with wasabi
 wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 
-bucketname="usaidepic"
+bucketname="{{ pillar['wasabi']['bucket'] }}"
 target="/var/www/vhosts"
 timestamp=$(date +%F-%H%M)
 
