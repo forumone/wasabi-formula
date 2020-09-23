@@ -15,7 +15,7 @@ fi
 # arguments required for awscli to work with wasabi
 wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 
-bucketname="{{ pillar['wasabi']['bucket'] }}"
+bucket="{{ pillar['wasabi']['bucket'] }}"
 target="/var/www/vhosts"
 timestamp=$(date +%F-%H%M)
 
@@ -26,13 +26,13 @@ if cd ${target}
 then
     for i in *
     do
-        echo "Weekly backup of ${target} beginning at ${timestamp}..."
-        tar -czf - $i | aws s3 ${wasabi_cmd_suffix} cp - s3://${bucketname}${target}-weekly/${i}-${timestamp}.tar.gz
+        logger -t wasabi backup of ${target} beginning at ${timestamp}
+        tar -czf - $i | aws s3 ${wasabi_cmd_suffix} cp - s3://${bucket}${target}-weekly/${i}-${timestamp}.tar.gz
         if [ $? ]
         then
-            echo "${target}/$i backed up at ${timestamp}"
+            logger -t wasabi ${target}/$i backup success up at ${timestamp}
         else
-            echo "${target}/$i backup error at ${timestamp}"
+            logger -t wasabi ${target}/$i error at ${timestamp}
         fi
     done
 fi
