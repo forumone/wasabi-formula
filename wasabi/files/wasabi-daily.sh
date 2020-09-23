@@ -62,7 +62,7 @@ do
         if [ -d "$source" ] && [ -x "$source" ];
         then
             echo "[wasabi] ${now} beginning back up of ${line}${source}..."
-            aws s3 sync "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} --exclude ${exclude} 2>&1 1>/dev/null && logger wasabi "$now" "$source" backup SUCCESS || logger wasabi "$source" backup ERROR
+            aws s3 sync "$source" s3://"${bucket}${source}" ${wasabi_cmd_suffix} --exclude "/etc/systemd/system/multi-user.target.wants/amazon-ssm-agent.service" --exclude "${exclude}" 2>&1 1>/dev/null && logger wasabi "$now" "$source" backup SUCCESS || logger wasabi "$source" backup ERROR
         fi
     fi
 done < $input
