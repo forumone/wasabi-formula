@@ -3,14 +3,14 @@ jq:
   pkg.installed:
     - name: jq
 
-# List of directories to back up
+# list of directories to back up, defined in pillar
 wasabi-backup:
   file.managed:
     - name: /etc/wasabi-backup.txt
     - source: salt://wasabi/files/wasabi-daily.tpl
     - template: jinja
 
-# rsync / db dump script
+# create directory
 /opt/wasabi/bin:
   file.directory:
     - user: root
@@ -18,6 +18,7 @@ wasabi-backup:
     - mode: 755
     - makedirs: True
 
+# daily sync / db dump script
 /opt/wasabi/bin/wasabi-daily.sh:
   file.managed:
     - user: root
@@ -26,6 +27,17 @@ wasabi-backup:
     - source: salt://wasabi/files/wasabi-daily.sh
     - template: jinja
     - require:
+      - file: /opt/wasabi/bin
+
+# vhosts weekly tarball
+/opt/wasabi/bin/wasabi-weekly.sh:
+  file.managed:
+    - user: root
+    - group: root
+    - mode: 750
+    - source: salt://wasabi/files/wasabi-weekly.sh
+    - template: jinja
+    - require: 
       - file: /opt/wasabi/bin
 
 # cron entry to run script
