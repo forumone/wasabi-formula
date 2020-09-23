@@ -45,22 +45,30 @@ wasabi-backup:
 {% if salt['pillar.get']('wasabi:dumpdbs', False) %}
 /opt/wasabi/bin/wasabi-daily.sh dumpdbs 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup-daily
+    - identifier: wasabi-daily
     - user: root
     - minute: random
     - hour: 2
 {% elif 'mysql' in salt['grains.get']('roles', 'roles:none') %}
 /opt/wasabi/bin/wasabi-daily.sh dumpdbs 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup-daily
+    - identifier: wasabi-daily
     - user: root
     - minute: random
     - hour: 2
 {% else %}
 /opt/wasabi/bin/wasabi-daily.sh 2>&1 | logger -t backups:
   cron.present:
-    - identifier: wasabibackup-daily
+    - identifier: wasabi-daily
     - user: root
     - minute: random
     - hour: 2
 {% endif %}
+
+/opt/wasabi/bin/wasabi-weekly.sh | logger -t backups:
+  cron.present:
+    - identifier: wasabi-weekly
+    - user: root
+    - minute: random
+    - hour: 0
+    - dayweek: 0
