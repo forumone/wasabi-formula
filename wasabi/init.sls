@@ -1,3 +1,4 @@
+{% set client = pillar.wasabi.client_id %}
 # install jq
 jq:
   pkg.installed:
@@ -26,6 +27,8 @@ wasabi-backup:
     - mode: 750
     - source: salt://wasabi/files/wasabi-daily.sh
     - template: jinja
+    - context:
+        client: {{ client_id }}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:
@@ -34,6 +37,9 @@ wasabi-backup:
     - group: root
     - mode: 750
     - source: salt://wasabi/files/mysql-daily.sh
+    - template: jinja
+    - context:
+        client: {{ client_id }}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:
@@ -42,7 +48,9 @@ wasabi-backup:
     - group: root
     - mode: 750
     - source: salt://wasabi/files/psql-daily.sh
-
+    - template: jinja
+    - context:
+        client: {{ client_id }}
 
 # Mysql backup
 /usr/sbin/mysqlbackup.sh:
@@ -68,6 +76,8 @@ wasabi-backup:
     - mode: 750
     - source: salt://wasabi/files/wasabi-weekly.sh
     - template: jinja
+    - context:
+        client: {{ client_id }}
 
 # cron entry to run script
 #  Enable DB dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist
@@ -79,7 +89,7 @@ wasabi-backup:
     - minute: random
     - hour: 0
 {% endif %}
-
+#  Enable Postgres dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist
 {% if pillar.wasabi.psql_backup == true %}
 /opt/wasabi/bin/psql-daily.sh 2>&1 | logger -t backups:
   cron.present:
