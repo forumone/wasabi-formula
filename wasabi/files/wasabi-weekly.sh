@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# add aws secretsmanager commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-AWS_SECRET_ACCESS_KEY=$(aws secretsmanager get-secret-value --secret-id WASABI_SECRET_ACCESS_KEY --region us-east-1 | jq -r .SecretString) && export AWS_SECRET_ACCESS_KEY
-AWS_ACCESS_KEY_ID=$(aws secretsmanager get-secret-value --secret-id WASABI_ACCESS_KEY_ID --region us-east-1 | jq -r .SecretString) && export AWS_ACCESS_KEY_ID
+# add aws cli parameter store commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and WASABI_BUCKET
+AWS_SECRET_ACCESS_KEY=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/key" --with-decryption | jq -r .Parameter.Value) && export AWS_SECRET_ACCESS_KEY
+AWS_ACCESS_KEY_ID=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/secret" --with-decryption | jq -r .Parameter.Value) && export AWS_ACCESS_KEY_ID
+WASABI_BUCKET=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/bucket" --with-decryption | jq -r .Parameter.Value) && export WASABI_BUCKET
 
 # exit 1 if access key not set
 if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]
@@ -15,12 +16,9 @@ fi
 # arguments required for awscli to work with wasabi
 wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 
-bucket="{{ pillar['wasabi']['bucket'] }}"
+bucket=$WASABI_BUCKET
 target="/var/www/vhosts"
 timestamp=$(date +%F-%H%M)
-
-
-#cd ${target} || echo "can't cd"
 
 if cd ${target}
 then

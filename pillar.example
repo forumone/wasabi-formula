@@ -1,8 +1,6 @@
 wasabi:
-  dumpdbs: True
-  bucket: name_of_wasabi_bucket
+  mysql_backup: True
+  psql_backup: True
   paths: 
     - /var/www/vhosts
-    - /etc/
-    - /var/lib/mysqlbackups/
-    - /var/spool/cron/
+    - /var/backups

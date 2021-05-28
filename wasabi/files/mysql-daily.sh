@@ -18,9 +18,6 @@ wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
 # exclude
 exclude="*>*"
 
-# file containing paths to backup, one per line.
-input="/etc/wasabi-backup.txt"
-
 # timestamp
 now=$(date +%F_%H-%M-%S)
 
@@ -37,19 +34,8 @@ function run {
 
 touch ${lockfile}
 
-# read paths from file, run aws sync against every valid path.
-while IFS= read -r line
-do
-    if [[ ! -z ${line} ]];
-    then
-        source=$(realpath "$line")
-        if [ -d "$source" ] && [ -x "$source" ];
-        then
-            echo "[wasabi] ${now} beginning back up of ${source}..."
-            aws s3 sync "$source" s3://"$WASABI_BUCKET${source}" ${wasabi_cmd_suffix} --no-follow-symlinks --exclude "/etc/systemd/system/multi-user.target.wants/amazon-ssm-agent.service" --exclude "${exclude}" 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
-        fi
-    fi
-done < $input
+/usr/sbin/automysqlbackup.sh
+aws s3 sync /var/backups/mysql s3://"$WASABI_BUCKET/mysql/" ${wasabi_cmd_suffix} --no-follow-symlinks 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
 
 #cleanup
 rm -f ${lockfile}
