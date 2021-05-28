@@ -34,7 +34,7 @@ function run {
 
 touch ${lockfile}
 
-/usr/sbin/automysqlbackup.sh
+/usr/sbin/mysqlbackup.sh
 aws s3 sync /var/backups/mysql s3://"$WASABI_BUCKET/mysql/" ${wasabi_cmd_suffix} --no-follow-symlinks 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
 
 #cleanup
