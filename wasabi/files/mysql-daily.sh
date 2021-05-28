@@ -2,9 +2,9 @@
 set -eo pipefail
 
 # add aws cli parameter store commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and WASABI_BUCKET
-AWS_SECRET_ACCESS_KEY=$(aws --region us-east-2 ssm get-parameter --name "/forumone/${{ client }}/wasabi/key" --with-decryption | jq -r .Parameter.Value) && export AWS_SECRET_ACCESS_KEY
-AWS_ACCESS_KEY_ID=$(aws --region us-east-2 ssm get-parameter --name "/forumone/${{ client }}/wasabi/secret" --with-decryption | jq -r .Parameter.Value) && export AWS_ACCESS_KEY_ID
-WASABI_BUCKET=$(aws --region us-east-2 ssm get-parameter --name "/forumone/${{ client }}/wasabi/bucket" --with-decryption | jq -r .Parameter.Value) && export WASABI_BUCKET
+AWS_SECRET_ACCESS_KEY=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/key" --with-decryption | jq -r .Parameter.Value) && export AWS_SECRET_ACCESS_KEY
+AWS_ACCESS_KEY_ID=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/secret" --with-decryption | jq -r .Parameter.Value) && export AWS_ACCESS_KEY_ID
+WASABI_BUCKET=$(aws --region us-east-2 ssm get-parameter --name "/forumone/{{ client }}/wasabi/bucket" --with-decryption | jq -r .Parameter.Value) && export WASABI_BUCKET
 # exit 1 if access key not set
 if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]
 then
