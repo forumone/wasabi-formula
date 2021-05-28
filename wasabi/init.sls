@@ -71,7 +71,7 @@ wasabi-backup:
 
 # cron entry to run script
 #  Enable DB dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist
-{% if pillar.wasabi.mysql_backup('',true) %}
+{% if pillar.wasabi.mysql_backup|default('',true) %}
 /opt/wasabi/bin/mysql-daily.sh 2>&1 | logger -t backups:
   cron.present:
     - identifier: mysql-daily-backup
