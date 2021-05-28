@@ -80,7 +80,7 @@ wasabi-backup:
     - hour: 0
 {% endif %}
 
-{% if pillar.wasabi.psql_backup = true %}
+{% if pillar.wasabi.psql_backup == true %}
 /opt/wasabi/bin/psql-daily.sh 2>&1 | logger -t backups:
   cron.present:
     - identifier: postgresql-daily-backup
