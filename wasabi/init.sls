@@ -1,4 +1,4 @@
-{% set client = pillar.wasabi.client_id %}
+{% set client_id = pillar.wasabi.client_id %}
 # install jq
 jq:
   pkg.installed:
