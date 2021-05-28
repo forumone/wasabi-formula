@@ -36,7 +36,7 @@ wasabi-backup:
     - source: salt://wasabi/files/mysql-daily.sh
 
 # PSQL daily
-/opt/wasabi/bin/mysql-daily.sh:
+/opt/wasabi/bin/psql-daily.sh:
   file.managed:
     - user: root
     - group: root
