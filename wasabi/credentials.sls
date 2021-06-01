@@ -1,4 +1,4 @@
-{% include 'wasabi/init.sls' with context %}
+{% from "wasabi/map.jinja" import wasabi_key, wasabi_secret with context %}
 
 /root/.aws/:
   file.directory:

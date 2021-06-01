@@ -1,4 +1,4 @@
-{% include 'wasabi/init.sls' with context %}
+{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:

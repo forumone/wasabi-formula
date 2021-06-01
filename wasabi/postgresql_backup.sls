@@ -1,4 +1,4 @@
-{% include 'wasabi/init.sls' with context %}
+{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:

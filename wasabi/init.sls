@@ -1,7 +1,4 @@
-{% set client = pillar.wasabi.client_id %}
-{% set wasabi_key = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/key" --with-decryption | jq -r .Parameter.Value') %}
-{% set wasabi_secret = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/secret" --with-decryption | jq -r .Parameter.Value') %}
-{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
 
 include:
   - .credentials
