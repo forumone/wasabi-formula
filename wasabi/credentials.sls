@@ -1,4 +1,5 @@
-{% include './init.sls' with context %}
+{% include 'wasabi/init.sls' with context %}
+
 /root/.aws/:
   file.directory:
     - user: root
