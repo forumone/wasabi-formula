@@ -1,4 +1,4 @@
-{% set client = pillar.client %}
+{% set client = pillar.client_id %}
 {% set wasabi_key = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/key" --with-decryption | jq -r .Parameter.Value') %}
 {% set wasabi_secret = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/secret" --with-decryption | jq -r .Parameter.Value') %}
 
