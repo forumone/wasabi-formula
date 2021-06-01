@@ -1,5 +1,5 @@
 {% set client = pillar.wasabi.client_id %}
-{% include 'wasabi.credentials.sls' %}
+{% include 'credentials.sls' %}
 
 include:
   - wasabi.credentials
