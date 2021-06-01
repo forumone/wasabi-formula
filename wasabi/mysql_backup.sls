@@ -1,4 +1,4 @@
-{% extends ".init.sls" %}
+{% include './init.sls' with context %}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:

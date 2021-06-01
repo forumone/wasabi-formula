@@ -1,4 +1,4 @@
-{% extends ".init.sls" %}
+{% include './init.sls' with context %}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:

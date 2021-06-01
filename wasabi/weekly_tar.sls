@@ -1,4 +1,4 @@
-{% extends ".init.sls" %}
+{% include './init.sls' with context %}
 
 # vhosts weekly tarball
 /opt/wasabi/bin/wasabi-weekly.sh:
