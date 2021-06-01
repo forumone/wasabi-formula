@@ -1,7 +1,5 @@
 wasabi:
   client_id: <client_id>
-  mysql_backup: True
-  psql_backup: True
   paths: 
     - /var/www/vhosts
     - /var/backups

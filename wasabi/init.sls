@@ -1,10 +1,16 @@
 {% set client_id = pillar.wasabi.client_id %}
-{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+include:
+  - credentials
+  - mysql_backup
+  - weekly_tar.sls
 
 # install jq
 jq:
   pkg.installed:
     - name: jq
+
+#Get wasabi buckety from Param store
+{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
 
 # list of directories to back up, defined in pillar
 wasabi-backup:
@@ -33,85 +39,13 @@ wasabi-backup:
         client: {{ client_id }}
         wasabi_bucket: {{ wasabi_bucket }}
 
-# Mysql daily
-/opt/wasabi/bin/mysql-daily.sh:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 750
-    - source: salt://wasabi/files/mysql-daily.sh
-    - template: jinja
-    - context:
-        client: {{ client_id }}
-        wasabi_bucket: {{ wasabi_bucket }}
-
-# PSQL daily
-/opt/wasabi/bin/psql-daily.sh:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 750
-    - source: salt://wasabi/files/psql-daily.sh
-    - template: jinja
-    - context:
-        client: {{ client_id }}
-        wasabi_bucket: {{ wasabi_bucket }}
-
-# Mysql backup
-/usr/sbin/mysqlbackup.sh:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 750
-    - source: salt://wasabi/files/mysqlbackup.sh
-
-# PSQL backup
-/usr/sbin/postgresqlbackup.sh:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 750
-    - source: salt://wasabi/files/postgresqlbackup.sh
-
-# vhosts weekly tarball
-/opt/wasabi/bin/wasabi-weekly.sh:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 750
-    - source: salt://wasabi/files/wasabi-weekly.sh
-    - template: jinja
-    - context:
-        client: {{ client_id }}
-        wasabi_bucket: {{ wasabi_bucket }}
-
-# cron entry to run script
-#  Enable DB dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist
-{% if pillar.wasabi.mysql_backup|default('',true) %}
-/opt/wasabi/bin/mysql-daily.sh 2>&1 | logger -t backups:
-  cron.present:
-    - identifier: mysql-daily-backup
-    - user: root
-    - minute: random
-    - hour: 0
-{% endif %}
-#  Enable Postgres dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist
-{% if pillar.wasabi.psql_backup == true %}
-/opt/wasabi/bin/psql-daily.sh 2>&1 | logger -t backups:
-  cron.present:
-    - identifier: postgresql-daily-backup
-    - user: root
-    - minute: random
-    - hour: 1
-{% endif %}
-
+#setup crontab entries
 /opt/wasabi/bin/wasabi-daily.sh 2>&1 | logger -t backups:
   cron.present:
     - identifier: wasabi-daily
     - user: root
     - minute: random
     - hour: 2
-
 
 /opt/wasabi/bin/wasabi-weekly.sh | logger -t backups:
   cron.present:
