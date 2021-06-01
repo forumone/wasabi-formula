@@ -1,10 +1,8 @@
 {% set client = pillar.wasabi.client_id %}
-{% include 'credentials.sls' %}
-
 include:
-  - wasabi.credentials
-  - wasabi.mysql_backup
-  - wasabi.weekly_tar
+  - .credentials
+  - .mysql_backup
+  - .weekly_tar
 
 # install jq
 jq:
