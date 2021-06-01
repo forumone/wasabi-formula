@@ -1,5 +1,4 @@
-{% set client = pillar.wasabi.client_id %}
-{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+{% include 'wasabi.credentials.sls' %}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:

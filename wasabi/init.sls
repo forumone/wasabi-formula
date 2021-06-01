@@ -10,7 +10,7 @@ jq:
     - name: jq
 
 #Get wasabi buckety from Param store
-{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+
 
 # list of directories to back up, defined in pillar
 wasabi-backup:
