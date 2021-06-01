@@ -1,4 +1,4 @@
-{% include 'wasabi.credentials.sls' %}
+{% extends ".init.sls" %}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:

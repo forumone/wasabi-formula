@@ -1,4 +1,4 @@
-{% include 'wasabi.credentials.sls' %}
+{% extends ".init.sls" %}
 
 # vhosts weekly tarball
 /opt/wasabi/bin/wasabi-weekly.sh:

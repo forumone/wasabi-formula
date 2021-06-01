@@ -1,3 +1,5 @@
+{% extends ".init.sls" %}
+
 /root/.aws/:
   file.directory:
     - user: root

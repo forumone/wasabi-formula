@@ -1,4 +1,4 @@
-{% include 'wasabi.credentials.sls' %}
+{% extends ".init.sls" %}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:
