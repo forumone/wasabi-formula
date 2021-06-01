@@ -1,3 +1,6 @@
+{% set client = pillar.wasabi.client_id %}
+{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:
   file.managed:
@@ -7,7 +10,7 @@
     - source: salt://wasabi/files/psql-daily.sh
     - template: jinja
     - context:
-        client: {{ client_id }}
+        client: {{ client }}
         wasabi_bucket: {{ wasabi_bucket }}
 
 # PSQL backup
