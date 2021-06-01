@@ -1,5 +1,4 @@
-{% extends ".init.sls" %}
-
+{% include './init.sls' with context %}
 /root/.aws/:
   file.directory:
     - user: root
