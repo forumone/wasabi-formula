@@ -1,4 +1,6 @@
 {% set client = pillar.wasabi.client_id %}
+{% include 'wasabi.credentials.sls' %}
+
 include:
   - wasabi.credentials
   - wasabi.mysql_backup
