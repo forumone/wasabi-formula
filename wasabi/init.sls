@@ -1,4 +1,4 @@
-{% set client_id = pillar.wasabi.client_id %}
+{% set client = pillar.wasabi.client_id %}
 include:
   - credentials
   - mysql_backup
@@ -36,7 +36,7 @@ wasabi-backup:
     - source: salt://wasabi/files/wasabi-daily.sh
     - template: jinja
     - context:
-        client: {{ client_id }}
+        client: {{ client }}
         wasabi_bucket: {{ wasabi_bucket }}
 
 #setup crontab entries
