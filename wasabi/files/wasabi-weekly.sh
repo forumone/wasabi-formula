@@ -24,6 +24,7 @@ then
 echo "Unable to get latest OFS Snapshot"
 exit 1
 elif [ test -f "/mnt/ofs_snapshot/README" ]
+then
 echo "Unable to mount snapshot!"
 exit 1
 else
@@ -45,8 +46,7 @@ for i in $(ls /mnt/ofs_snapshot/vhosts/)
             logger -t wasabi ${target}/$i error at ${timestamp}
         fi
     done
-fi
-elif
+else
 echo "Objective FS Snapshot is not mounted, Unable to backup"
 exit 1
 fi
