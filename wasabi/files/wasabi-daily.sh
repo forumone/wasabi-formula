@@ -22,7 +22,7 @@ function run {
 #get S3 FS
 snap=$(date +%Y-%m-%d)
 ofs_snapshot=$(/sbin/mount.objectivefs list -sz james-ofs-q7fc1co4/www@$snap | tail -n 1 | awk '{print $1}')
-if [ $snap -z ]
+if [ $ofs_snapshot -z ]
 then
 echo "Unable to get latest OFS Snapshot"
 exit 1
