@@ -32,7 +32,7 @@ do
         if [ -d "$source" ] && [ -x "$source" ];
         then
             echo "[wasabi] ${now} beginning back up of ${source}..."
-            aws --profile wasabi  s3 sync "$source" s3://"{{ WASABI_BUCKET}}/${source}" --no-follow-symlinks --exclude "/etc/systemd/system/multi-user.target.wants/amazon-ssm-agent.service" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
+            aws --profile wasabi  s3 sync "$source" s3://"{{ wasabi_bucket }}/${source}" --no-follow-symlinks --exclude "/etc/systemd/system/multi-user.target.wants/amazon-ssm-agent.service" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
         fi
     fi
 done < $input
