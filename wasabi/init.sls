@@ -2,7 +2,7 @@
 include:
   - wasabi.credentials
   - wasabi.mysql_backup
-  - wasabi.weekly_tar.sls
+  - wasabi.weekly_tar
 
 # install jq
 jq:
