@@ -11,3 +11,11 @@
     - context:
         client: {{ client }}
         wasabi_bucket: {{ wasabi_bucket }}
+
+/opt/wasabi/bin/wasabi-weekly.sh 2>&1 | logger -t backups:
+  cron.present:
+    - identifier: wasabi-weekly
+    - user: root
+    - minute: random
+    - hour: 3
+    - dayweek: 0
