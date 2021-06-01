@@ -1,4 +1,6 @@
 {% set client_id = pillar.wasabi.client_id %}
+{% set wasabi_bucket = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + client + '"/wasabi/bucket" --with-decryption | jq -r .Parameter.Value') %}
+
 # install jq
 jq:
   pkg.installed:
@@ -29,6 +31,7 @@ wasabi-backup:
     - template: jinja
     - context:
         client: {{ client_id }}
+        wasabi_bucket: {{ wasabi_bucket }}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:
@@ -40,6 +43,7 @@ wasabi-backup:
     - template: jinja
     - context:
         client: {{ client_id }}
+        wasabi_bucket: {{ wasabi_bucket }}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:
@@ -51,6 +55,7 @@ wasabi-backup:
     - template: jinja
     - context:
         client: {{ client_id }}
+        wasabi_bucket: {{ wasabi_bucket }}
 
 # Mysql backup
 /usr/sbin/mysqlbackup.sh:
@@ -78,6 +83,7 @@ wasabi-backup:
     - template: jinja
     - context:
         client: {{ client_id }}
+        wasabi_bucket: {{ wasabi_bucket }}
 
 # cron entry to run script
 #  Enable DB dumps if wasabi:mysql_backup is True. Set a default True value if doesn't exist

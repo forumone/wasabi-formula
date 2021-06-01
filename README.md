@@ -2,7 +2,7 @@
 salt formula for wasabi s3 backups
 
 ## Requirements
-This formula is dependent on there being two AWS SecretsManager secrets named WASABI_ACCESS_KEY_ID, and WASABI_SECRET_ACCESS_KEY being available to the instance this script runs on.
+This formula is dependent on there being three AWS Paramter store values secrets named WASABI_ACCESS_KEY_ID, WASABI_SECRET_ACCESS_KEY and WASABI_BUCKET being available to the instance this script runs on.
 
 ## Description
 
@@ -10,9 +10,10 @@ This formula is dependent on there being two AWS SecretsManager secrets named WA
 
 ```wasabi-weekly.sh``` - this script creates a tarball of each of the vhost directories in /var/www/vhosts/, and copies to wasabi in /var/www/vhosts-weekly
 
-## To-Do
-~- Make $1 optional - currently fails if no arguments given~
+```mysql_backup.sh``` - uses cutom automsysqlbackup script to run MySql backups and rotate files
 
-~- Set aws s3 sync to not follow symlinks~
+```psql_backup.sh``` - uses cutom autopsqlbackup script to run Postgresql backups and rotate files
 
-~- Redirect stdout to /dev/null, stderr to stdout (2>&1 1>/dev/null)~
+## Usage
+Include formula in salt-master
+add postgresql_backup to Utility Server's top.sls - if required
