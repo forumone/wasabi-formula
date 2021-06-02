@@ -1,4 +1,4 @@
-{% set project = pillar.vhosts.client %}
+{% set project = pillar.client %}
 
 {% set wasabi_key = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + project + '"/wasabi/key" --with-decryption | jq -r .Parameter.Value') %}
 {% set wasabi_secret = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + project + '"/wasabi/secret" --with-decryption | jq -r .Parameter.Value') %}
