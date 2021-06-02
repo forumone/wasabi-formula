@@ -11,9 +11,6 @@
     - context:
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
-    - require:
-      - sls:
-        - ./init
 
 # Mysql backup
 /usr/sbin/mysqlbackup.sh:

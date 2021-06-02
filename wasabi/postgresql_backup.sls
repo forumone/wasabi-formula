@@ -11,9 +11,6 @@
     - context:
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
-    - require:
-      - sls:
-        - ./init
 
 # PSQL backup
 /usr/sbin/postgresqlbackup.sh:
