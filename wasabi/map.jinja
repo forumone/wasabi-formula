@@ -1,6 +1,6 @@
 {% if pillar.vhosts.client is defined %}
   {% set project = pillar.vhosts.client %}
-{% elif %}
+{% else %}
   {% set project = pillar.vhosts.project %}
 {% endif %}
 
