@@ -1,7 +1,7 @@
 {% if pillar.vhosts.client is defined %}
-{% set project = pillar.vhosts.client %}
-{% else %}
-{% set project = pillar.vhosts.project %}
+  {% set project = pillar.vhosts.client %}
+{% elif %}
+  {% set project = pillar.vhosts.project %}
 {% endif %}
 
 {% set wasabi_key = salt['cmd.shell']('aws --region us-east-2 ssm get-parameter --name "/forumone/"' + project + '"/wasabi/key" --with-decryption | jq -r .Parameter.Value') %}
