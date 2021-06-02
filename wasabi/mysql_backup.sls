@@ -12,7 +12,7 @@
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
     - require:
-      - /opt/wasabi/bin/
+      - /opt/wasabi/bin
 
 # Mysql backup
 /usr/sbin/mysqlbackup.sh:
