@@ -31,7 +31,7 @@ ENABLE_PLAIN_BACKUPS=yes
 ENABLE_GLOBALS_BACKUPS=yes
 
 #Exclude Databases from backup
-DB_EXCLUDE_LIST="postgres "
+DB_EXCLUDE_LIST="master postgres rdsadmin"
 
 #### SETTINGS FOR ROTATED BACKUPS ####
 
