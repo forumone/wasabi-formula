@@ -4,6 +4,7 @@ include:
   - .credentials
   - .mysql_backup
   - .weekly_tar
+  - .postgresql_backup
 
 # install jq
 jq:
