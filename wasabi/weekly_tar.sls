@@ -12,7 +12,8 @@
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
     - require:
-      - sls: ./init
+      - sls: 
+        - init
 
 /opt/wasabi/bin/wasabi-weekly.sh 2>&1 | logger -t backups:
   cron.present:
@@ -21,4 +22,5 @@
     - minute: random
     - hour: 3
     - dayweek: 0
-    - require: /opt/wasabi/bin/wasabi-weekly.sh
+    - require:
+      - /opt/wasabi/bin/wasabi-weekly.sh

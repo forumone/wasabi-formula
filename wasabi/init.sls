@@ -30,7 +30,8 @@ jq:
     - context:
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
-    - require: /opt/wasabi/bin
+    - require:
+      - /opt/wasabi/bin
 
 #setup crontab entries
 /opt/wasabi/bin/wasabi-daily.sh 2>&1 | logger -t backups:
@@ -39,4 +40,5 @@ jq:
     - user: root
     - minute: random
     - hour: 2
-    - require: /opt/wasabi/bin/wasabi-daily.sh
+    - require:
+      - /opt/wasabi/bin/wasabi-daily.sh

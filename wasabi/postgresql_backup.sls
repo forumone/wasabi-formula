@@ -12,7 +12,8 @@
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
     - require:
-      - sls: ./init
+      - sls:
+        - ./init
 
 # PSQL backup
 /usr/sbin/postgresqlbackup.sh:
@@ -28,4 +29,5 @@
     - user: root
     - minute: random
     - hour: 1
-    - require: /usr/sbin/postgresqlbackup.sh
+    - require:
+      - /usr/sbin/postgresqlbackup.sh
