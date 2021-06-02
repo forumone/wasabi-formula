@@ -1,4 +1,4 @@
-{% if pillar.vhosts.client is present %}
+{% if pillar.vhosts.client is defined %}
 {% set project = pillar.vhosts.client %}
 {% else %}
 {% set project = pillar.vhosts.project %}
