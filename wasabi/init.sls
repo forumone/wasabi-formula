@@ -11,16 +11,6 @@ jq:
   pkg.installed:
     - name: jq
 
-#Get wasabi buckety from Param store
-
-
-# list of directories to back up, defined in pillar
-wasabi-backup:
-  file.managed:
-    - name: /etc/wasabi-backup.txt
-    - source: salt://wasabi/files/wasabi-daily.tpl
-    - template: jinja
-
 # create directory
 /opt/wasabi/bin:
   file.directory:
@@ -40,6 +30,7 @@ wasabi-backup:
     - context:
         project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
+    - require: /opt/wasabi/bin
 
 #setup crontab entries
 /opt/wasabi/bin/wasabi-daily.sh 2>&1 | logger -t backups:
@@ -48,3 +39,4 @@ wasabi-backup:
     - user: root
     - minute: random
     - hour: 2
+    - require: /opt/wasabi/bin/wasabi-daily.sh

@@ -13,6 +13,7 @@ wasabi_aws_profile_exists:
     - user: root
     - group: root
     - mode: '0600'
+    - require: /root/.aws/
 
 wasabi_aws_credentials_exists:
   file.managed:
@@ -20,6 +21,7 @@ wasabi_aws_credentials_exists:
     - user: root
     - group: root
     - mode: '0600'
+    - require: /root/.aws/
 
 wasabi_aws_profile:
   file.append:
@@ -28,6 +30,7 @@ wasabi_aws_profile:
         [wasabi]
         region=us-east-1
         output=json
+    - require: wasabi_aws_profile_exists
 
 wasabi_aws_credentials:
   file.append:
@@ -36,3 +39,4 @@ wasabi_aws_credentials:
         [wasabi]
         aws_access_key_id={{ wasabi_key }}
         aws_secret_access_key={{ wasabi_secret }}
+    - require: wasabi_aws_credentials_exists
