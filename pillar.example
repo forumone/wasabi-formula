@@ -1,5 +1,2 @@
 wasabi:
   client_id: <client_id>
-  paths: 
-    - /var/www/vhosts
-    - /var/backups
