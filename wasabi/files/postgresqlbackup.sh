@@ -19,16 +19,16 @@ BACKUP_DIR=/var/backups/postgresql/
 # List of strings to match against in database name, separated by space or comma, for which we only
 # wish to keep a backup of the schema, not the data. Any database names which contain any of these
 # values will be considered candidates. (e.g. "system_log" will match "dev_system_log_2010-01")
-SCHEMA_ONLY_LIST=""
+SCHEMA_ONLY_LIST="master postgres rdsadmin"
 
 # Will produce a custom-format backup if set to "yes"
-ENABLE_CUSTOM_BACKUPS=yes
+ENABLE_CUSTOM_BACKUPS=no
 
 # Will produce a gzipped plain-format backup if set to "yes"
 ENABLE_PLAIN_BACKUPS=yes
 
 # Will produce gzipped sql file containing the cluster globals, like users and passwords, if set to "yes"
-ENABLE_GLOBALS_BACKUPS=yes
+ENABLE_GLOBALS_BACKUPS=no
 
 #Exclude Databases from backup
 DB_EXCLUDE_LIST="master postgres rdsadmin"
