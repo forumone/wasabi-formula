@@ -1,13 +1,13 @@
 #! /usr/bin/env bash
 set -eo pipefail
 
+lockfile -r 0 /tmp/prebackup.lock || exit 1
+
 # exclude
 exclude="*>*"
 
 # timestamp
 now=$(date +%F_%H-%M-%S)
-
-lockfile=/tmp/prebackup.lock
 
 function run {
     "$@"
@@ -37,7 +37,6 @@ fi
 
 if test -f "/mnt/ofs_snapshot/README"
 then
-  touch $lockfile
 #Back up Snapshot
   run aws --profile wasabi  s3 sync /mnt/ofs_snapshot/ s3://"{{ wasabi_bucket }}/" --no-follow-symlinks --exclude "*healthcheck*" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
 else
@@ -47,4 +46,4 @@ fi
 
 #cleanup
 umount /mnt/ofs_snapshot
-rm -f ${lockfile}
+rm -f /tmp/prebackup.lock

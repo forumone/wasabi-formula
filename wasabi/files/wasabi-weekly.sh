@@ -1,9 +1,10 @@
 #! /usr/bin/env bash
 set -eo pipefail
 
+lockfile -r 0 /tmp/prebackup.lock || exit 1
+
 timestamp=$(date +%F_%H-%M-%S)
 
-lockfile=/tmp/prebackup.lock
 
 function run {
     "$@"
@@ -29,7 +30,6 @@ else
 fi
 
 if test -f "/mnt/ofs_snapshot/README"; then
-touch $lockfile
 #Back up folders to tar.gz format
 for i in $(ls /mnt/ofs_snapshot/vhosts/)
   do
@@ -50,5 +50,5 @@ fi
 
 #cleanup
 umount /mnt/ofs_snapshot
-rm -f ${lockfile}
+rm -f /tmp/prebackup.lock
 

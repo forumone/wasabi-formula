@@ -1,4 +1,4 @@
-{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
+{% from "wasabi/map.jinja" import project, wasabi_bucket with context %}
 
 # PSQL daily
 /opt/wasabi/bin/psql-daily.sh:
@@ -9,7 +9,7 @@
     - source: salt://wasabi/files/psql-daily.sh
     - template: jinja
     - context:
-        client: {{ client }}
+        project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
 
 # PSQL backup

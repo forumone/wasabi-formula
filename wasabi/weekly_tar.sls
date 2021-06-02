@@ -1,4 +1,4 @@
-{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
+{% from "wasabi/map.jinja" import project, wasabi_bucket with context %}
 
 # vhosts weekly tarball
 /opt/wasabi/bin/wasabi-weekly.sh:
@@ -9,7 +9,7 @@
     - source: salt://wasabi/files/wasabi-weekly.sh
     - template: jinja
     - context:
-        client: {{ client }}
+        project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
 
 /opt/wasabi/bin/wasabi-weekly.sh 2>&1 | logger -t backups:

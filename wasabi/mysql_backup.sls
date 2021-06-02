@@ -1,4 +1,4 @@
-{% from "wasabi/map.jinja" import client, wasabi_bucket with context %}
+{% from "wasabi/map.jinja" import project, wasabi_bucket with context %}
 
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:
@@ -9,7 +9,7 @@
     - source: salt://wasabi/files/mysql-daily.sh
     - template: jinja
     - context:
-        client: {{ client }}
+        project: {{ project }}
         wasabi_bucket: {{ wasabi_bucket }}
 
 # Mysql backup
