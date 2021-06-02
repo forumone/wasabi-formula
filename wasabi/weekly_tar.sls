@@ -21,4 +21,4 @@
     - minute: random
     - hour: 3
     - dayweek: 0
-  - require: /opt/wasabi/bin/wasabi-weekly.sh
+    - require: /opt/wasabi/bin/wasabi-weekly.sh
