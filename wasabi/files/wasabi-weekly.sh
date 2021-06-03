@@ -28,7 +28,7 @@ snap=$(date +%Y-%m-%d)
 ofs_snapshot=$(/sbin/mount.objectivefs list -sz $ofs@$snap | tail -n 1 | awk '{print $1}')
 
 #Create the mount point if it does not exist
-if test ! -d /mnt/ofs_snapshot/; then
+if test ! -d /mnt/ofs_snapshot; then
     mkdir /mnt/ofs_snapshot/
 fi
 
