@@ -32,13 +32,12 @@ snap=$(date +%Y-%m-%d)
 ofs_snapshot=$(/sbin/mount.objectivefs list -sz $ofs@$snap | tail -n 1 | awk '{print $1}')
 
 #Create the mount point if it does not exist
-if test -e /mnt/ofs_snapshot/; then
-    mkdir /mnt/ofs_snapshot/
+if test ! -d /mnt/ofs_snapshot ; then
+    mkdir -p /mnt/ofs_snapshot/
 fi
 
 #Check to see if snapshot was available - exit with error if not
-if test -z $ofs_snapshot
-then
+if test -z $ofs_snapshot; then
   echo "Unable to get latest OFS Snapshot"
   exit 1
 #Test to see if snapshot is already mounted - fail if it is
@@ -49,8 +48,7 @@ else
   /sbin/mount.objectivefs $ofs_snapshot /mnt/ofs_snapshot
 fi
 #Mount snapshot and backup
-if test -f "/mnt/ofs_snapshot/README"
-then
+if test -f "/mnt/ofs_snapshot/README"; then
 #Back up Snapshot
   run aws --profile wasabi  s3 sync /mnt/ofs_snapshot/ s3://"{{ wasabi_bucket }}/" --no-follow-symlinks --exclude "*healthcheck*" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
 else

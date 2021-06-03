@@ -28,13 +28,12 @@ snap=$(date +%Y-%m-%d)
 ofs_snapshot=$(/sbin/mount.objectivefs list -sz $ofs@$snap | tail -n 1 | awk '{print $1}')
 
 #Create the mount point if it does not exist
-if test -e /mnt/ofs_snapshot/; then
+if test ! -d /mnt/ofs_snapshot/; then
     mkdir /mnt/ofs_snapshot/
 fi
 
 #Check to see if snapshot was available - exit with error if not
-if test -z $ofs_snapshot
-then
+if test -z $ofs_snapshot; then
   echo "Unable to get latest OFS Snapshot"
   exit 1
 #Test to see if snapshot is already mounted - fail if it is
