@@ -50,7 +50,7 @@ fi
 #Mount snapshot and backup
 if test -f "/mnt/ofs_snapshot/README"; then
 #Back up Snapshot
-  run aws --profile wasabi  s3 sync /mnt/ofs_snapshot/ s3://"{{ wasabi_bucket }}/" --no-follow-symlinks --exclude "*healthcheck*" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
+  run aws --profile wasabi  s3 sync /mnt/ofs_snapshot/ s3://"{{ wasabi_bucket }}/" --no-follow-symlinks --exclude "*healthcheck*" --exclude "${exclude}" --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" WASABI backup SUCCESS || logger -t wasabi "$source" WASABI backup ERROR
 else
   echo "Objective FS Snapshot is not mounted, Unable to backup"
   exit 1
