@@ -1,8 +1,12 @@
 # wasabi-formula
 salt formula for wasabi s3 backups
+This WILL NOT backup files NOT on shared Objective FS Volume.  Additonal states would be required for that and this is HIGHLY discouraged because servers should be ephmeral and all config managed via salt.
 
 ## Requirements
 This formula is dependent on there being three AWS Paramter store values secrets named WASABI_ACCESS_KEY_ID, WASABI_SECRET_ACCESS_KEY and WASABI_BUCKET being available to the instance this script runs on.
+Also need to have ro-mysql (and ro-psql) DNS entries defined in local DNS - these scripts use the Read Only Aurora endpoints to backup databases - as not to clobber open running connections
+Also requires Objective FS and ONLY backups files From the latest Objective FS snapshot - again not to clobber open files
+
 
 ## Description
 
@@ -15,5 +19,6 @@ This formula is dependent on there being three AWS Paramter store values secrets
 ```psql_backup.sh``` - uses cutom autopsqlbackup script to run Postgresql backups and rotate files
 
 ## Usage
-Include formula in salt-master
+Include formula in salt-master config
+add wasabi to Utility Server's in salt/top.sls
 add postgresql_backup to Utility Server's top.sls - if required
