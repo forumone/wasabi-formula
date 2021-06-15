@@ -23,7 +23,7 @@ function run {
 }
 
 run /usr/sbin/postgresqlbackup.sh
-run aws --profile wasabi s3 sync /var/backups/psql s3://"{{ wasabi_bucket }}/psql/" --no-follow-symlinks --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
+run aws --profile wasabi s3 sync /var/backups/postgresql s3://"{{ wasabi_bucket }}/postgresql/" --no-follow-symlinks --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" backup SUCCESS || logger -t wasabi "$source" backup ERROR
 
 #cleanup
 rm -f $lock
