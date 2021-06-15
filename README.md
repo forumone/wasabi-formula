@@ -35,4 +35,4 @@ Wasabi Bucket created matching the parameter above
 Make sure all requirements are met above
 Include formula in salt-master config
 add wasabi to Utility Server's in salt/top.sls
-add postgresql_backup to Utility Server's top.sls - if required
+add wasabi.postgresql_backup to Utility Server's top.sls - if required
