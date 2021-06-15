@@ -1,230 +1,282 @@
-##############################
-## POSTGRESQL BACKUP CONFIG ##
-##############################
+#!/bin/bash
+#
+#!!!! Modified for use by Forumone's Salt Stack Setup
+#
+#adapted from automysqlbackup backup for Postgres
 
-# Optional system user to run backups as.  If the user the script is running as doesn't match this
-# the script terminates.  Leave blank to skip check.
-BACKUP_USER=root
+# Use the Read Only Postgresql endpoint to create backups
+DBHOST="ro-psql"
+#set the DB user that can backup all the Db's
+DBUSER="master"
 
-# Optional hostname to adhere to pg_hba policies.  Will default to "localhost" if none specified.
-HOSTNAME=ro-psql
+# Backup directory location e.g /backups
+BACKUPDIR="/var/backups/postgresql"
 
-# Optional username to connect to database as.  Will default to "postgres" if none specified.
-USERNAME=master
+# Mail setup
+# What would you like to be mailed to you?
+# - log   : send only log file
+# - files : send log file and sql files as attachments (see docs)
+# - stdout : will simply output the log to the screen if run manually.
+# - quiet : Only send logs if an error occurs to the MAILADDR.
+MAILCONTENT="error"
 
-# This dir will be created if it doesn't exist.  This must be writable by the user the script is
-# running as.
-BACKUP_DIR=/var/backups/postgresql/
+# Set the maximum allowed email size in k. (4000 = approx 5MB email [see docs])
+MAXATTSIZE="4000"
 
-# List of strings to match against in database name, separated by space or comma, for which we only
-# wish to keep a backup of the schema, not the data. Any database names which contain any of these
-# values will be considered candidates. (e.g. "system_log" will match "dev_system_log_2010-01")
-SCHEMA_ONLY_LIST="master postgres rdsadmin"
+# Email Address to send mail to? (user@domain.com)
+#MAILADDR="sysadmins@forumone.com"
 
-# Will produce a custom-format backup if set to "yes"
-ENABLE_CUSTOM_BACKUPS=no
+# ============================================================
+# === ADVANCED OPTIONS ( Read the doc's below for details )===
+#=============================================================
 
-# Will produce a gzipped plain-format backup if set to "yes"
-ENABLE_PLAIN_BACKUPS=yes
+# List of DBNAMES to EXLUCDE - seperate with comma's
+DBEXCLUDE="master,rdsadmin,postgres"
 
-# Will produce gzipped sql file containing the cluster globals, like users and passwords, if set to "yes"
-ENABLE_GLOBALS_BACKUPS=no
+# Which day do you want weekly backups? (1 to 7 where 1 is Monday)
+DOWEEKLY=6
 
-#Exclude Databases from backup
-DB_EXCLUDE_LIST="master postgres rdsadmin"
+# Enable inline compression.
+COMPRESS=yes
 
-#### SETTINGS FOR ROTATED BACKUPS ####
+# Additionally keep a copy of the most recent backup in a seperate directory.
+LATEST=no
 
-# Which day to take the weekly backup from (1-7 = Monday-Sunday)
-DAY_OF_WEEK_TO_KEEP=7
+#=====================================================================
+PATH=/usr/local/bin:/usr/bin:/bin
+DATE=`date +%Y-%m-%d_%Hh%Mm`				# Datestamp e.g 2002-09-21
+DOW=`date +%A`							# Day of the week e.g. Monday
+DNOW=`date +%u`						# Day number of the week 1 to 7 where 1 represents Monday
+DOM=`date +%d`							# Date of the Month e.g. 27
+M=`date +%B`							# Month e.g January
+W=`date +%V`							# Week Number e.g 37
+VER=1.2									# Version Number
+LOGFILE=$BACKUPDIR/$DBHOST-`date +%N`.log		# Logfile Name
+LOGERR=$BACKUPDIR/ERRORS_$DBHOST-`date +%N`.log		# Logfile Name
+BACKUPFILES=""
+#-F p -O -x - Exports DB without Owners or Permissions into a raw sql format
+OPT="-F p -O -x " # OPT string for use with pg_dump 
 
-# Number of days to keep daily backups
-DAYS_TO_KEEP=7
-
-# How many weeks to keep weekly backups
-WEEKS_TO_KEEP=5
-
-######################################
-
-
-###########################
-#### PRE-BACKUP CHECKS ####
-###########################
-
-# Make sure we're running as the required backup user
-if [ "$BACKUP_USER" != "" -a "$(id -un)" != "$BACKUP_USER" ] ; then
-	echo "This script must be run as $BACKUP_USER. Exiting." 1>&2
-	exit 1
-fi
-
-
-###########################
-### INITIALISE DEFAULTS ###
-###########################
-
-if [ ! $HOSTNAME ]; then
-	HOSTNAME="localhost"
-fi;
-
-if [ ! $USERNAME ]; then
-	USERNAME="postgres"
-fi;
-
-
-###########################
-#### START THE BACKUPS ####
-###########################
-
-function perform_backups()
-{
-	SUFFIX=$1
-	FINAL_BACKUP_DIR=$BACKUP_DIR"`date +\%Y-\%m-\%d`$SUFFIX/"
-
-	echo "Making backup directory in $FINAL_BACKUP_DIR"
-
-	if ! mkdir -p $FINAL_BACKUP_DIR; then
-		echo "Cannot create backup directory in $FINAL_BACKUP_DIR. Go and fix it!" 1>&2
-		exit 1;
-	fi;
-	
-	#######################
-	### GLOBALS BACKUPS ###
-	#######################
-
-	echo -e "\n\nPerforming globals backup"
-	echo -e "--------------------------------------------\n"
-
-	if [ $ENABLE_GLOBALS_BACKUPS = "yes" ]
+# Add compression option to $OPT - 9 sets max compression
+if [ "$COMPRESS" = "yes" ];
 	then
-		    echo "Globals backup"
-
-		    set -o pipefail
-		    if ! pg_dumpall -g -h "$HOSTNAME" -U "$USERNAME" | gzip > $FINAL_BACKUP_DIR"globals".sql.gz.in_progress; then
-		            echo "[!!ERROR!!] Failed to produce globals backup" 1>&2
-		    else
-		            mv $FINAL_BACKUP_DIR"globals".sql.gz.in_progress $FINAL_BACKUP_DIR"globals".sql.gz
-		    fi
-		    set +o pipefail
-	else
-		echo "None"
+		OPT="$OPT -Z 9"
 	fi
 
+suffix='.gz'
 
-	###########################
-	### SCHEMA-ONLY BACKUPS ###
-	###########################
-	
-	for SCHEMA_ONLY_DB in ${SCHEMA_ONLY_LIST//,/ }
-	do
-	        SCHEMA_ONLY_CLAUSE="$SCHEMA_ONLY_CLAUSE or datname ~ '$SCHEMA_ONLY_DB'"
-	done
-	
-	SCHEMA_ONLY_QUERY="select datname from pg_database where false $SCHEMA_ONLY_CLAUSE order by datname;"
-	
-	echo -e "\n\nPerforming schema-only backups"
-	echo -e "--------------------------------------------\n"
-	
-	SCHEMA_ONLY_DB_LIST=`psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$SCHEMA_ONLY_QUERY" postgres`
-	
-	echo -e "The following databases were matched for schema-only backup:\n${SCHEMA_ONLY_DB_LIST}\n"
-	
-	for DATABASE in $SCHEMA_ONLY_DB_LIST
-	do
-	        echo "Schema-only backup of $DATABASE"
-		set -o pipefail
-	        if ! pg_dump -Fp -s -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" | gzip > $FINAL_BACKUP_DIR"$DATABASE"_SCHEMA.sql.gz.in_progress; then
-	                echo "[!!ERROR!!] Failed to backup database schema of $DATABASE" 1>&2
-	        else
-	                mv $FINAL_BACKUP_DIR"$DATABASE"_SCHEMA.sql.gz.in_progress $FINAL_BACKUP_DIR"$DATABASE"_SCHEMA.sql.gz
-	        fi
-	        set +o pipefail
-	done
-	
-	
-	###########################
-	###### FULL BACKUPS #######
-	###########################
+# Create required directories
+if [ ! -e "$BACKUPDIR" ]		# Check Backup Directory exists.
+	then
+	mkdir -p "$BACKUPDIR"
+fi
 
-	for SCHEMA_ONLY_DB in ${SCHEMA_ONLY_LIST//,/ }
-	do
-		EXCLUDE_SCHEMA_ONLY_CLAUSE="$EXCLUDE_SCHEMA_ONLY_CLAUSE and datname !~ '$SCHEMA_ONLY_DB'"
-	done
+if [ ! -e "$BACKUPDIR/daily" ]		# Check Daily Directory exists.
+	then
+	mkdir -p "$BACKUPDIR/daily"
+fi
 
-	BACKUP_QUERY="select datname from pg_database where not datistemplate and datallowconn $EXCLUDE_SCHEMA_ONLY_CLAUSE order by datname;"
+if [ ! -e "$BACKUPDIR/weekly" ]		# Check Weekly Directory exists.
+	then
+	mkdir -p "$BACKUPDIR/weekly"
+fi
 
-	for EXCLUDE in  ${DB_EXCLUDE_LIST//,/ }
-	do
-		DBNAMES=`echo $BACKUP_QUERY | sed "s/\b$EXCLUDE\b//g"`
-	done
-        FULL_BACKUP_QUERY=$DBNAMES
+if [ ! -e "$BACKUPDIR/monthly" ]	# Check Monthly Directory exists.
+	then
+	mkdir -p "$BACKUPDIR/monthly"
+fi
 
-	echo -e "\n\nPerforming full backups"
-	echo -e "--------------------------------------------\n"
+if [ "$LATEST" = "yes" ]
+then
+	if [ ! -e "$BACKUPDIR/latest" ]	# Check Latest Directory exists.
+	then
+		mkdir -p "$BACKUPDIR/latest"
+	fi
+eval rm -fv "$BACKUPDIR/latest/*"
+fi
 
-	for DATABASE in `psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$FULL_BACKUP_QUERY" postgres`
-	do
-		if [ $ENABLE_PLAIN_BACKUPS = "yes" ]
-		then
-			echo "Plain backup of $DATABASE"
-	 
-			set -o pipefail
-			if ! pg_dump -Fp -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" | gzip > $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress; then
-				echo "[!!ERROR!!] Failed to produce plain backup database $DATABASE" 1>&2
-			else
-				mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"$DATABASE".sql.gz
-			fi
-			set +o pipefail
-                        
-		fi
+# IO redirection for logging.
+touch $LOGFILE
+exec 6>&1           # Link file descriptor #6 with stdout.
+                    # Saves stdout.
+exec > $LOGFILE     # stdout replaced with file $LOGFILE.
+touch $LOGERR
+exec 7>&2           # Link file descriptor #7 with stderr.
+                    # Saves stderr.
+exec 2> $LOGERR     # stderr replaced with file $LOGERR.
 
-		if [ $ENABLE_CUSTOM_BACKUPS = "yes" ]
-		then
-			echo "Custom backup of $DATABASE"
-	
-			if ! pg_dump -Fc -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" -f $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress; then
-				echo "[!!ERROR!!] Failed to produce custom backup database $DATABASE"
-			else
-				mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$DATABASE".custom
-			fi
-		fi
 
-	done
+# Functions
 
-	echo -e "\nAll database backups complete!"
+# Database dump function
+dbdump () {
+if [ "$COMPRESS" = "yes" ]; then
+	pg_dump -h $DBHOST -U $DBUSER $OPT $1 > "$2$SUFFIX"
+else
+	pg_dump -h $DBHOST -U $DBUSER $OPT $1 > $2
+fi
+return 0
 }
 
-# MONTHLY BACKUPS
 
-DAY_OF_MONTH=`date +%d`
 
-if [ $DAY_OF_MONTH -eq 1 ];
-then
-	# Delete all expired monthly directories
-	find $BACKUP_DIR -maxdepth 1 -name "*-monthly" -exec rm -rf '{}' ';'
-	        	
-	perform_backups "-monthly"
+
+#get all the DBS to backup
+PSQLDBNAMES=( $(psql -h $DBHOST -U $DBUSER postgres -Atq -c "SELECT datname FROM pg_database where not datistemplate and datname <> ALL ('{$DBEXCLUDE}');") )
+
+echo ======================================================================
+echo 
+echo Backup of Database Server - $DBHOST
+echo ======================================================================
+
+
+echo Backup Start Time `date`
+echo ======================================================================
+	# Monthly Full Backup of all Databases
+	if [ $DOM = "01" ]; then
+		for DB in $PSQLDBNAMES
+		do
+ 
+			 # Prepare $DB for using
+		        DB="`echo $DB | sed 's/%/ /g'`"
+
+			if [ ! -e "$BACKUPDIR/monthly/$DB" ]		# Check Monthly DB Directory exists.
+			then
+				mkdir -p "$BACKUPDIR/monthly/$DB"
+			fi
+			echo Monthly Backup of $DB...
+				dbdump "$DB" "$BACKUPDIR/monthly/$DB/${DB}_$DATE.$M.$DB.sql"
+				BACKUPFILES="$BACKUPFILES $BACKUPDIR/monthly/$DB/${DB}_$DATE.$M.$DB.sql$SUFFIX"
+			echo ----------------------------------------------------------------------
+		done
+	fi
+
+	for DB in $PSQLDBNAMES
+	do
+	# Prepare $DB for using
+	DB="`echo $DB | sed 's/%/ /g'`"
 	
-	exit 0;
+	# Create Seperate directory for each DB
+	if [ ! -e "$BACKUPDIR/daily/$DB" ]		# Check Daily DB Directory exists.
+		then
+		mkdir -p "$BACKUPDIR/daily/$DB"
+	fi
+	
+	if [ ! -e "$BACKUPDIR/weekly/$DB" ]		# Check Weekly DB Directory exists.
+		then
+		mkdir -p "$BACKUPDIR/weekly/$DB"
+	fi
+	
+	# Weekly Backup
+	if [ $DNOW = $DOWEEKLY ]; then
+		echo Weekly Backup of Database \( $DB \)
+		echo Rotating 5 weeks Backups...
+			if [ "$W" -le 05 ];then
+				REMW=`expr 48 + $W`
+			elif [ "$W" -lt 15 ];then
+				REMW=0`expr $W - 5`
+			else
+				REMW=`expr $W - 5`
+			fi
+		eval rm -fv "$BACKUPDIR/weekly/$DB/${DB}_week.$REMW.*" 
+		echo
+			dbdump "$DB" "$BACKUPDIR/weekly/$DB/${DB}_week.$W.$DATE.sql"
+			BACKUPFILES="$BACKUPFILES $BACKUPDIR/weekly/$DB/${DB}_week.$W.$DATE.sql$SUFFIX"
+		echo ----------------------------------------------------------------------
+	
+	# Daily Backup
+	else
+		echo Daily Backup of Database \( $DB \)
+		echo Rotating last weeks Backup...
+		eval rm -fv "$BACKUPDIR/daily/$DB/*.$DOW.sql.*" 
+		echo
+			dbdump "$DB" "$BACKUPDIR/daily/$DB/${DB}_$DATE.$DOW.sql"
+			BACKUPFILES="$BACKUPFILES $BACKUPDIR/daily/$DB/${DB}_$DATE.$DOW.sql$SUFFIX"
+		echo ----------------------------------------------------------------------
+	fi
+	done
+echo Backup End `date`
+echo ======================================================================
+
+echo Total disk space used for backup storage..
+echo Size - Location
+echo `du -hs "$BACKUPDIR"`
+echo
+echo ======================================================================
+#echo If you find AutoBackupPostgresql valuable please make a donation at
+#echo http://sourceforge.net/project/project_donations.php?group_id=101066
+echo ======================================================================
+
+# Run command when we're done
+if [ "$POSTBACKUP" ]
+	then
+	echo ======================================================================
+	echo "Postbackup command output."
+	echo
+	eval $POSTBACKUP
+	echo
+	echo ======================================================================
 fi
 
-# WEEKLY BACKUPS
+#Clean up IO redirection
+exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.
+exec 1>&7 7>&-      # Restore stdout and close file descriptor #7.
 
-DAY_OF_WEEK=`date +%u` #1-7 (Monday-Sunday)
-EXPIRED_DAYS=`expr $((($WEEKS_TO_KEEP * 7) + 1))`
-
-if [ $DAY_OF_WEEK = $DAY_OF_WEEK_TO_KEEP ];
+if [ "$MAILCONTENT" = "files" ]
 then
-	# Delete all expired weekly directories
-	find $BACKUP_DIR -maxdepth 1 -mtime +$EXPIRED_DAYS -name "*-weekly" -exec rm -rf '{}' ';'
-	        	
-	perform_backups "-weekly"
-	
-	exit 0;
+	if [ -s "$LOGERR" ]
+	then
+		# Include error log if is larger than zero.
+		BACKUPFILES="$BACKUPFILES $LOGERR"
+		ERRORNOTE="WARNING: Error Reported - "
+	fi
+	#Get backup size
+	ATTSIZE=`du -c $BACKUPFILES | grep "[[:digit:][:space:]]total$" |sed s/\s*total//`
+	if [ $MAXATTSIZE -ge $ATTSIZE ]
+	then
+		BACKUPFILES=`echo "$BACKUPFILES" | sed -e "s# # -a #g"`	#enable multiple attachments
+		mutt -s "$ERRORNOTE Postgresql Backup Log and SQL Files for $DBHOST - $DATE" $BACKUPFILES $MAILADDR < $LOGFILE		#send via mutt
+	else
+		cat "$LOGFILE" | mail -s "WARNING! - Postgresql Backup exceeds set maximum attachment size on $DBHOST - $DATE" $MAILADDR
+	fi
+elif [ "$MAILCONTENT" = "log" ]
+then
+	cat "$LOGFILE" | mail -s "Postgresql Backup Log for $DBHOST - $DATE" $MAILADDR
+	if [ -s "$LOGERR" ]
+		then
+			cat "$LOGERR" | mail -s "ERRORS REPORTED: Postgresql Backup error Log for $DBHOST - $DATE" $MAILADDR
+	fi	
+elif [ "$MAILCONTENT" = "quiet" ]
+then
+	if [ -s "$LOGERR" ]
+		then
+			cat "$LOGERR" | mail -s "ERRORS REPORTED: Postgresql Backup error Log for $DBHOST - $DATE" $MAILADDR
+			cat "$LOGFILE" | mail -s "Postgresql Backup Log for $DBHOST - $DATE" $MAILADDR
+	fi
+else
+	if [ -s "$LOGERR" ]
+		then
+			cat "$LOGFILE"
+			echo
+			echo "###### WARNING ######"
+			echo "Errors reported during AutoBackupPostgresql execution.. Backup failed"
+			echo "Error log below.."
+			cat "$LOGERR"
+	else
+		cat "$LOGFILE"
+	fi	
 fi
 
-# DAILY BACKUPS
+if [ -s "$LOGERR" ]
+	then
+		STATUS=1
+	else
+		STATUS=0
+fi
 
-# Delete daily backups 7 days old or more
-find $BACKUP_DIR -maxdepth 1 -mtime +$DAYS_TO_KEEP -name "*-daily" -exec rm -rf '{}' ';'
+# Clean up Logfile
+eval rm -f "$LOGFILE"
+eval rm -f "$LOGERR"
 
-perform_backups "-daily"
+exit $STATUS
+
