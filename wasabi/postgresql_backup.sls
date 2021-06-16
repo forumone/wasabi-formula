@@ -13,7 +13,7 @@
         wasabi_bucket: {{ wasabi_bucket }}
     - require:
       - /opt/wasabi/bin
-      
+
 # PSQL backup
 /usr/sbin/postgresqlbackup.sh:
   file.managed:
