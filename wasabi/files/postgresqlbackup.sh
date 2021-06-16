@@ -24,7 +24,7 @@ MAILCONTENT="error"
 MAXATTSIZE="4000"
 
 # Email Address to send mail to? (user@domain.com)
-#MAILADDR="sysadmins@forumone.com"
+MAILADDR="sysadmins@forumone.com"
 
 # ============================================================
 # === ADVANCED OPTIONS ( Read the doc's below for details )===
