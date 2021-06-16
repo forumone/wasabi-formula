@@ -1,38 +1,69 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#! /usr/bin/env bash
+set -eo pipefail
 
-# add aws secretsmanager commands to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-AWS_SECRET_ACCESS_KEY=$(aws secretsmanager get-secret-value --secret-id WASABI_SECRET_ACCESS_KEY --region us-east-1 | jq -r .SecretString) && export AWS_SECRET_ACCESS_KEY
-AWS_ACCESS_KEY_ID=$(aws secretsmanager get-secret-value --secret-id WASABI_ACCESS_KEY_ID --region us-east-1 | jq -r .SecretString) && export AWS_ACCESS_KEY_ID
+#use flock to set a lock file to keep multiple copies of the script from running
+scriptname=$(basename $0)
+lock="/var/run/${scriptname}"
+exec 200>$lock
+flock -n 200 || exit 1
 
-# exit 1 if access key not set
-if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]
-then
-    echo "awscli access key or secret not set, exiting"
-    exit
+timestamp=$(date +%F_%H-%M-%S)
+
+function run {
+    "$@"
+    local status=$?
+    if [ $status -ne 0 ]; then
+       echo "Error with $1"
+    fi
+    return $status
+}
+
+#Get Objective FS mount from fstab entry
+ofs=$(grep ofs /etc/fstab | awk '{print $1}')
+
+#Get todays day in a in the proper format for objective fs snapshots
+snap=$(date +%Y-%m-%d)
+
+#Get the latest ObjectiveFS Snapshot
+ofs_snapshot=$(/sbin/mount.objectivefs list -sz $ofs@$snap | tail -n 1 | awk '{print $1}')
+
+#Create the mount point if it does not exist
+if test ! -d /mnt/ofs_snapshot; then
+    mkdir /mnt/ofs_snapshot/
 fi
 
-# arguments required for awscli to work with wasabi
-wasabi_cmd_suffix="--endpoint-url=https://s3.wasabisys.com"
+#Check to see if snapshot was available - exit with error if not
+if test -z $ofs_snapshot; then
+  echo "Unable to get latest OFS Snapshot"
+  exit 1
+#Test to see if snapshot is already mounted - fail if it is
+elif test -f "/mnt/ofs_snapshot/README"; then
+  echo "Unable to mount snapshot!"
+  exit 1
+else
+  /sbin/mount.objectivefs $ofs_snapshot /mnt/ofs_snapshot
+fi
 
-bucket="{{ pillar['wasabi']['bucket'] }}"
-target="/var/www/vhosts"
-timestamp=$(date +%F-%H%M)
-
-
-#cd ${target} || echo "can't cd"
-
-if cd ${target}
-then
-    for i in *
-    do
-        logger -t wasabi backup of ${target} beginning at ${timestamp}
-        tar -czf - $i | aws s3 ${wasabi_cmd_suffix} cp - s3://${bucket}${target}-weekly/${i}-${timestamp}.tar.gz
-        if [ $? ]
-        then
-            logger -t wasabi ${target}/$i backup success up at ${timestamp}
+if test -f "/mnt/ofs_snapshot/README"; then
+#Back up folders to tar.gz format
+for i in $(ls /mnt/ofs_snapshot/vhosts/)
+  do
+  if [[ "$i" != "healthcheck" ]]; then
+        logger -t wasabi tar backup of vhosts beginning at ${timestamp}
+        run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
+        if [ $? ]; then
+            logger -t wasabi $i backup success up at ${timestamp}
         else
-            logger -t wasabi ${target}/$i error at ${timestamp}
+            logger -t wasabi $i error at ${timestamp}
         fi
+  fi
     done
+else
+echo "Objective FS Snapshot is not mounted, Unable to backup"
+exit 1
 fi
+
+#cleanup
+umount /mnt/ofs_snapshot
+rm -f $lock
+
