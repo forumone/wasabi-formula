@@ -122,7 +122,7 @@ return 0
 
 
 #get all the DBS to backup
-PSQLDBNAMES=( $(psql -h $DBHOST -U $DBUSER postgres -Atq -c "SELECT datname FROM pg_database where not datistemplate and datname <> ALL ('{$DBEXCLUDE}');") )
+PSQLDBNAMES=$(psql -h $DBHOST -U $DBUSER -At -c "select datname from pg_database where not datistemplate and datname <> ALL ('{$DBEXCLUDE}');")
 
 echo ======================================================================
 echo 
