@@ -63,7 +63,7 @@ if [ "$COMPRESS" = "yes" ];
 		OPT="$OPT -Z 9"
 	fi
 
-suffix='.gz'
+SUFFIX='.gz'
 
 # Create required directories
 if [ ! -e "$BACKUPDIR" ]		# Check Backup Directory exists.
