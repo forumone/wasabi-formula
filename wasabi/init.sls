@@ -1,9 +1,9 @@
 {% from "wasabi/map.jinja" import project, wasabi_bucket with context %}
 
 include:
-  - .credentials
-  - .mysql_backup
-  - .weekly_tar
+  - wasabi.credentials
+  - wasabi.mysql_backup
+  - wasabi.weekly_tar
 
 # install jq
 jq:
