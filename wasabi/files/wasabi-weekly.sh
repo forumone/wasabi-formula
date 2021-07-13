@@ -19,7 +19,7 @@ function run {
 }
 
 #Get Objective FS mount from fstab entry
-ofs=$(grep ofs /etc/fstab | awk '{print $1}')
+ofs=$(grep s3 /etc/fstab | awk '{print $1}')
 
 #Get todays day in a in the proper format for objective fs snapshots
 snap=$(date +%Y-%m-%d)
