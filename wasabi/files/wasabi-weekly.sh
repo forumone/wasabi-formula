@@ -52,9 +52,9 @@ for i in $(ls /mnt/ofs_snapshot/vhosts/)
         logger -t wasabi tar backup of vhosts beginning at ${timestamp}
         run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
         if [ $? ]; then
-            logger -t wasabi $i backup success up at ${timestamp}
+            logger -t wasabi $i WASABI WEEKLY BACKUP SUCCESS up at ${timestamp}
         else
-            logger -t wasabi $i error at ${timestamp}
+            logger -t wasabi $i WASABI WEEKLY BACKUP ERROR at ${timestamp}
         fi
   fi
     done
@@ -62,6 +62,8 @@ else
 echo "Objective FS Snapshot is not mounted, Unable to backup"
 exit 1
 fi
+
+grep "WASABI WEEKLY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://"{{ wasabi_bucket }}/weekly-backup.log" --endpoint-url=https://s3.wasabisys.com
 
 #cleanup
 umount /mnt/ofs_snapshot
