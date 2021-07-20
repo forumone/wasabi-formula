@@ -1,5 +1,12 @@
 {% from "wasabi/map.jinja" import project, wasabi_bucket with context %}
 
+#Append my.cnf
+/root/.my.cnf:
+  file.append:
+    - text: |
+        [mysqldump]
+        host = ro-mysql
+
 # Mysql daily
 /opt/wasabi/bin/mysql-daily.sh:
   file.managed:
