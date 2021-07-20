@@ -19,7 +19,7 @@
     - identifier: wasabi-weekly
     - user: root
     - minute: random
-    - hour: 3
+    - hour: 4
     - dayweek: 0
     - require:
       - /opt/wasabi/bin/wasabi-weekly.sh

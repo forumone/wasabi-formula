@@ -27,6 +27,6 @@
     - identifier: postgresql-daily-backup
     - user: root
     - minute: random
-    - hour: 1
+    - hour: 7
     - require:
       - /usr/sbin/postgresqlbackup.sh

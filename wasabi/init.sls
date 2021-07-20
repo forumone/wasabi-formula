@@ -38,6 +38,6 @@ jq:
     - identifier: wasabi-daily
     - user: root
     - minute: random
-    - hour: 2
+    - hour: 8
     - require:
       - /opt/wasabi/bin/wasabi-daily.sh

@@ -28,6 +28,6 @@
     - identifier: mysql-daily-backup
     - user: root
     - minute: random
-    - hour: 0
+    - hour: 6
     - require:
       - /usr/sbin/mysqlbackup.sh
