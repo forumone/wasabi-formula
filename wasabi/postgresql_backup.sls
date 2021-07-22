@@ -21,7 +21,11 @@
     - group: root
     - mode: 750
     - source: salt://wasabi/files/postgresqlbackup.sh
-
+    - template: jinja
+{% if pillar.wasabi.psql_exclude is defined %}
+    - context:
+        psql_exclude: {{ pillar.wasabi.psql_exclude }}
+{% endif %}
 /opt/wasabi/bin/psql-daily.sh 2>&1 | logger -t backups:
   cron.present:
     - identifier: postgresql-daily-backup

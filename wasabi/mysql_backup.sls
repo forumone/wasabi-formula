@@ -28,6 +28,11 @@
     - group: root
     - mode: 750
     - source: salt://wasabi/files/mysqlbackup.sh
+    - template: jinja
+{% if pillar.wasabi.mysql_exclude is defined %}
+    - context:
+        mysql_exclude: {{ pillar.wasabi.mysql_exclude }}
+{% endif %}
 
 #Run daily at midnight
 /opt/wasabi/bin/mysql-daily.sh 2>&1 | logger -t backups:

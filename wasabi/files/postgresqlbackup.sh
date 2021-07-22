@@ -31,7 +31,7 @@ MAILADDR="sysadmins@forumone.com"
 #=============================================================
 
 # List of DBNAMES to EXLUCDE - seperate with comma's
-DBEXCLUDE="master,rdsadmin,postgres"
+DBEXCLUDE="master,rdsadmin,postgres,{{ psql_exclude }}"
 
 # Which day do you want weekly backups? (1 to 7 where 1 is Monday)
 DOWEEKLY=6

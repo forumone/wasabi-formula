@@ -60,7 +60,7 @@ MAILADDR="sysadmins@forumone.com"
 MDBNAMES="mysql $DBNAMES"
 
 # List of DBNAMES to EXLUCDE if DBNAMES are set to all (must be in " quotes)
-DBEXCLUDE="information_schema  master  mysql  performance_schema  sys  tmp"
+DBEXCLUDE="information_schema  master  mysql  performance_schema  sys  tmp  {{ mysql_exclude }}"
 
 # List of tables to exclude from the backup (in form db.table)
 TABLEEXCLUDE=""
