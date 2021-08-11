@@ -21,6 +21,10 @@ function run {
     fi
     return $status
 }
+#check for open ofs mount and close it
+if grep -qs '/mnt/ofs_snapshot' /proc/mounts; then
+    umount /mnt/ofs_snapshot
+fi
 
 #Get Objective FS mount from fstab entry
 ofs=$(grep s3 /etc/fstab | awk '{print $1}')

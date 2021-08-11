@@ -36,11 +36,14 @@ wasabi_aws_profile:
       - wasabi_aws_profile_exists
 
 wasabi_aws_credentials:
-  file.append:
+  file.replace:
+    - append_if_not_found: True
     - name: /root/.aws/credentials
-    - text: |
+    - pattern: |
+        [wasabi]
+        aws_access_key_id=
+        aws_secret_access_key=
+    - repl: |
         [wasabi]
         aws_access_key_id={{ wasabi_key }}
         aws_secret_access_key={{ wasabi_secret }}
-    - require:
-      - wasabi_aws_credentials_exists
