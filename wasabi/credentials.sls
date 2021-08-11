@@ -10,6 +10,7 @@
 wasabi_aws_profile_exists:
   file.managed:
     - name: /root/.aws/config
+    - replace: False
     - user: root
     - group: root
     - mode: '0600'
@@ -19,6 +20,7 @@ wasabi_aws_profile_exists:
 wasabi_aws_credentials_exists:
   file.managed:
     - name: /root/.aws/credentials
+    - replace: False
     - user: root
     - group: root
     - mode: '0600'
