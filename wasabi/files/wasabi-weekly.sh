@@ -32,6 +32,11 @@ if test ! -d /mnt/ofs_snapshot; then
     mkdir /mnt/ofs_snapshot/
 fi
 
+#check for open ofs mount and close it
+if grep -qs '/mnt/ofs_snapshot' /proc/mounts; then
+    umount /mnt/ofs_snapshot
+fi
+
 #Check to see if snapshot was available - exit with error if not
 if test -z $ofs_snapshot; then
   echo "Unable to get latest OFS Snapshot"
