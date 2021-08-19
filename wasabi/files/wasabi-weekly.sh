@@ -33,7 +33,7 @@ if test ! -d /mnt/ofs_snapshot; then
 fi
 
 #check for open ofs mount and close it
-if grep -qs '/mnt/ofs_snapshot' /proc/mounts; then
+if test -f "/mnt/ofs_snapshot/README"; then
     umount /mnt/ofs_snapshot
 fi
 
