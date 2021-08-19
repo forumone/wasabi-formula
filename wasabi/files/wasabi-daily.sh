@@ -22,8 +22,8 @@ function run {
     return $status
 }
 #check for open ofs mount and close it
-if grep -qs '/mnt/ofs_snapshot' /proc/mounts; then
-    umount /mnt/ofs_snapshot
+if test -f "/mnt/ofs_snapshot/README"; then
+  umount /mnt/ofs_snapshot
 fi
 
 #Get Objective FS mount from fstab entry
