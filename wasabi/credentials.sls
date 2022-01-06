@@ -1,4 +1,15 @@
 {% from "wasabi/map.jinja" import wasabi_key, wasabi_secret with context %}
+jq:
+  pkg.installed:
+    - name: jq
+
+# create directory
+/opt/wasabi/bin:
+  file.directory:
+    - user: root
+    - group: root
+    - mode: 755
+    - makedirs: True
 
 /root/.aws/:
   file.directory:
