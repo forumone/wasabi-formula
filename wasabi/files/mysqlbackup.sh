@@ -602,21 +602,21 @@ then
 		BACKUPFILES=`echo "$BACKUPFILES" | sed -e "s# # -a #g"`	#enable multiple attachments
 		mutt -s "$ERRORNOTE MySQL Backup Log and SQL Files for $HOST - $DATE" $BACKUPFILES $MAILADDR < $LOGFILE		#send via mutt
 	else
-		cat "$LOGFILE" | mail -s "WARNING! - MySQL Backup exceeds set maximum attachment size on $HOST - $DATE" $MAILADDR
+		cat "$LOGFILE" | mail -s "WARNING! - MySQL Backup exceeds set maximum attachment size on $(hostname) - $DATE" $MAILADDR
 	fi
 elif [ "$MAILCONTENT" = "log" ]
 then
-	cat "$LOGFILE" | mail -s "MySQL Backup Log for $HOST - $DATE" $MAILADDR
+	cat "$LOGFILE" | mail -s "MySQL Backup Log for $(hostname) - $DATE" $MAILADDR
 	if [ -s "$LOGERR" ]
 		then
-			cat "$LOGERR" | mail -s "ERRORS REPORTED: MySQL Backup error Log for $HOST - $DATE" $MAILADDR
+			cat "$LOGERR" | mail -s "ERRORS REPORTED: MySQL Backup error Log for $(hostname) - $DATE" $MAILADDR
 	fi	
 elif [ "$MAILCONTENT" = "quiet" ]
 then
 	if [ -s "$LOGERR" ]
 		then
-			cat "$LOGERR" | mail -s "ERRORS REPORTED: MySQL Backup error Log for $HOST - $DATE" $MAILADDR
-			cat "$LOGFILE" | mail -s "MySQL Backup Log for $HOST - $DATE" $MAILADDR
+			cat "$LOGERR" | mail -s "ERRORS REPORTED: MySQL Backup error Log for $(hostname) - $DATE" $MAILADDR
+			cat "$LOGFILE" | mail -s "MySQL Backup Log for $(hostname) - $DATE" $MAILADDR
 	fi
 else
 	if [ -s "$LOGERR" ]
