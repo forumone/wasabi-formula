@@ -37,7 +37,7 @@ function cleanup {
 
 #email function
 function email {
-    echo "$(hostname) Wasabi backup Errors" | mailx -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
+    echo "$(hostname) Wasabi backup Errors" | mailx -s "$(hostname) Wasabi backup Errors" jbernardi@forumone.com
 }
 
 #fail function to run cleanup on failures
