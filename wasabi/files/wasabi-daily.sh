@@ -19,6 +19,7 @@ for E in ${EXCLUDES[@]}; do
 #timestamp
 now=$(date +%F_%H-%M-%S)
 DOW=$(date +%a)
+
 #creates a run function to drop exit codes on command failures
 function run {
     "$@"
@@ -28,6 +29,7 @@ function run {
     fi
     return $status
 }
+
 #cleanup script resources function
 function cleanup {
     umount /mnt/ofs_snapshot
@@ -91,24 +93,25 @@ if test -f "/mnt/ofs_snapshot/README"; then
                 fail
             fi
       fi
-        done
+    done
   #Daily Back up Snapshot
   else
     run aws --profile wasabi s3 sync /mnt/ofs_snapshot/ s3://{{ wasabi_bucket }}/ --no-follow-symlinks ${INCLUDE} ${EXCLUDE} --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" WASABI DAILY BACKUP SUCCESS || logger -t wasabi "$now" "$source" WASABI DAILY BACKUP ERROR
-    #send log entries to wasabi bucket for debugging later
-    grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
-    
-    status=$(grep '$now' /var/log/messages | grep 'ERROR')
-    
-    if test -z $status; then
-    cleanup
-    else
-    fail
-    fi
   fi
 else
   logger -t wasabi "$now" Objective FS Snapshot is not mounted, Unable to backup
   fail
 fi
 
+#send log entries to wasabi bucket for debugging later
+grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
+#Check Log for errors
+status=$(grep '$now' /var/log/messages | grep 'ERROR')
+#If there is an error - send a message or clean up script or both
+if test -z $status; then
+  cleanup
+else
+  fail
+fi
+#cleanup in case all checks fail
 cleanup
