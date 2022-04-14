@@ -97,7 +97,9 @@ if test -f "/mnt/ofs_snapshot/README"; then
     run aws --profile wasabi s3 sync /mnt/ofs_snapshot/ s3://{{ wasabi_bucket }}/ --no-follow-symlinks ${INCLUDE} ${EXCLUDE} --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" WASABI DAILY BACKUP SUCCESS || logger -t wasabi "$now" "$source" WASABI DAILY BACKUP ERROR
     #send log entries to wasabi bucket for debugging later
     grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
-    status=$(grep -E '$now|ERROR' /var/log/messages)
+    
+    status=$(grep '$now' /var/log/messages | grep 'ERROR')
+    
     if test -z $status; then
     cleanup
     else
