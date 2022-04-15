@@ -107,8 +107,10 @@ fi
 grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
 #Check Log for errors
 ERRORS=$(grep '$now' /var/log/messages | grep 'ERROR')
+
 #If there is an error - send a message or clean up script or both
 if test -z $ERRORS; then
+  echo "HELLO!"
   cleanup
 else
   fail
