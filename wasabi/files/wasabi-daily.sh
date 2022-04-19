@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-set -x
 set -eo pipefail
 #use flock to set a lock file to keep multiple copies of the script from running
 scriptname=$(basename $0)
