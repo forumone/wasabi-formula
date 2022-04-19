@@ -31,22 +31,11 @@ function run {
     return $status
 }
 
-#cleanup script resources function
-function cleanup {
-    umount /mnt/ofs_snapshot
-    rm -f $lock
-}
-
-#email function
-function email {
-    echo "$(hostname) Wasabi backup Errors" | mailx -s "$(hostname) Wasabi backup Errors" jbernardi@forumone.com
-}
-
 #fail function to run cleanup on failures
 function fail {
     umount /mnt/ofs_snapshot
     rm -f $lock
-    email
+    echo "$(hostname) Wasabi backup Errors" | mailx -s "$(hostname) Wasabi backup Errors" jbernardi@forumone.com
     exit 1
 }
 
@@ -103,13 +92,16 @@ else
   fail
 fi
 
+#cleanup
+umount /mnt/ofs_snapshot
+rm -f $lock
+
 #send log entries to wasabi bucket for debugging later
 grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
+
 #Check Log for errors
 ERRORS=$(grep "$now" /var/log/messages | grep ERROR)
-cleanup
 #If there is an error - send a message or clean up script or both
 if [[ ! -z "$ERRORS" ]]
   fail
 fi
-#cleanup in case all checks fail
