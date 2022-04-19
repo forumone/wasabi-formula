@@ -33,10 +33,12 @@ function run {
 
 #fail function to run cleanup on failures
 function fail {
-    umount /mnt/ofs_snapshot
-    rm -f $lock
-    echo "$(hostname) Wasabi backup Errors" | mailx -s "$(hostname) Wasabi backup Errors" jbernardi@forumone.com
-    exit 1
+  echo "$(hostname) Wasabi backup Errors" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" jbernardi@forumone.com
+  rm -f $lock
+  if test -f "/mnt/ofs_snapshot/README"; then
+  umount /mnt/ofs_snapshot
+  fi
+  exit 1
 }
 
 #objectivefs Snapshot mount - to not backup open files
@@ -105,3 +107,4 @@ ERRORS="YES"
 if [[ ! -z "$ERRORS" ]]; then
   fail
 fi
+exit 0
