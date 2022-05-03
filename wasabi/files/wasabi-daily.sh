@@ -106,6 +106,7 @@ grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3:/
 ERRORS=$(grep $now /var/log/messages | grep ERROR)
 #If there is an error - send a message or clean up script or both
 if [[ ! -z $ERRORS ]]; then
+  echo $ERRORS | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
   fail
 else
   exit 0
