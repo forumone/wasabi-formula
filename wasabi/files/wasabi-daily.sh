@@ -32,7 +32,7 @@ function run {
 
 #fail function to run cleanup on failures
 function fail {
-  echo "$(hostname) Wasabi backup Errors" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
+#  echo "$(hostname) Wasabi backup Errors" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
   rm -f $lock
   if test -f "/mnt/ofs_snapshot/README"; then
   umount /mnt/ofs_snapshot
@@ -104,9 +104,10 @@ grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3:/
 
 #Check Log for errors
 ERRORS=$(grep $now /var/log/messages | grep ERROR)
+BACKUPLOG=$(grep $now /var/log/messages | grep backups)
 #If there is an error - send a message or clean up script or both
 if [[ ! -z $ERRORS ]]; then
-  echo $ERRORS | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
+  echo $BACKUPLOG | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
   fail
 else
   exit 0
