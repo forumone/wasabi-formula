@@ -107,7 +107,7 @@ ERRORS=$(grep $now /var/log/messages | grep ERROR)
 BACKUPLOG=$(grep backups /var/log/messages)
 #If there is an error - send a message or clean up script or both
 if [[ ! -z $ERRORS ]]; then
-  echo "$BACKUPLOG" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
+  echo "${BACKUPLOG}" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
   fail
 else
   exit 0
