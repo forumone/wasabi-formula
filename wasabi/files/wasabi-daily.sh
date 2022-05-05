@@ -6,6 +6,8 @@ lock="/var/run/${scriptname}"
 exec 200>$lock
 flock -n 200 || exit 1
 
+logger -t wasabi "$now" WASABI DAILY BACKUP Start
+
 #include & exclude flies/folders
 INCLUDES=("^\.env")
 EXCLUDES=("*>*" "^\.")
@@ -99,16 +101,18 @@ if test -f "/mnt/ofs_snapshot/README"; then
 fi
 rm -f $lock
 
-#send log entries to wasabi bucket for debugging later
-grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
-
 #Check Log for errors
 ERRORS=$(grep $now /var/log/messages | grep ERROR)
 BACKUPLOG=$(grep backups /var/log/messages)
 #If there is an error - send a message or clean up script or both
 if [[ ! -z $ERRORS ]]; then
-  echo "${BACKUPLOG}" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup Errors" sysadmins@forumone.com
+  echo "${BACKUPLOG}" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup errors" sysadmins@forumone.com
   fail
 else
   exit 0
 fi
+
+logger -t wasabi "$now" WASABI DAILY BACKUP Finish
+
+#send log entries to wasabi bucket for debugging later
+grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
