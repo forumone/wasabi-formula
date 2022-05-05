@@ -76,7 +76,7 @@ if test -f "/mnt/ofs_snapshot/README"; then
       if [[ "$i" != "healthcheck" ]]; then
             logger -t wasabi tar backup of vhosts beginning at ${timestamp}
             run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
-            if [ $? ]; then
+            if [ "$?" -eq 0 ]; then
                 logger -t wasabi $i WASABI WEEKLY BACKUP SUCCESS up at ${timestamp}
             else
                 logger -t wasabi $i WASABI WEEKLY BACKUP ERROR at ${timestamp}
