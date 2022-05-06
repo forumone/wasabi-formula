@@ -101,6 +101,9 @@ if test -f "/mnt/ofs_snapshot/README"; then
 fi
 rm -f $lock
 
+#send log entries to wasabi bucket for debugging later
+grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
+
 #Check Log for errors
 ERRORS=$(grep $now /var/log/messages | grep ERROR)
 BACKUPLOG=$(grep backups /var/log/messages)
@@ -109,10 +112,6 @@ if [[ ! -z $ERRORS ]]; then
   echo "${BACKUPLOG}" | mailx -r wasabi@byf1.dev -s "$(hostname) Wasabi backup errors" sysadmins@forumone.com
   fail
 else
+  logger -t wasabi "$now" WASABI DAILY BACKUP Finish
   exit 0
 fi
-
-logger -t wasabi "$now" WASABI DAILY BACKUP Finish
-
-#send log entries to wasabi bucket for debugging later
-grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
