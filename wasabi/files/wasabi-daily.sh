@@ -77,7 +77,7 @@ if test -f "/mnt/ofs_snapshot/README"; then
     for i in $(ls /mnt/ofs_snapshot/vhosts/); do
       if [[ "$i" != "healthcheck" ]]; then
             logger -t wasabi tar backup of vhosts beginning at ${timestamp}
-            run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
+            run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi --region us-east-1 s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
             if [ "$?" -eq 0 ]; then
                 logger -t wasabi $i WASABI WEEKLY BACKUP SUCCESS up at ${timestamp}
             else
@@ -88,7 +88,7 @@ if test -f "/mnt/ofs_snapshot/README"; then
     done
   #Daily Back up Snapshot
   else
-    run aws --profile wasabi s3 sync /mnt/ofs_snapshot/ s3://{{ wasabi_bucket }}/ --no-follow-symlinks --delete ${INCLUDE} ${EXCLUDE} --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" WASABI DAILY BACKUP SUCCESS || logger -t wasabi "$now" "$source" WASABI DAILY BACKUP ERROR
+    run aws --profile wasabi --region us-east-1 s3 sync /mnt/ofs_snapshot/ s3://{{ wasabi_bucket }}/ --no-follow-symlinks --delete ${INCLUDE} ${EXCLUDE} --endpoint-url=https://s3.wasabisys.com 2>&1 1>/dev/null && logger -t wasabi "$now" "$source" WASABI DAILY BACKUP SUCCESS || logger -t wasabi "$now" "$source" WASABI DAILY BACKUP ERROR
   fi
 else
   logger -t wasabi "$now" Objective FS Snapshot is not mounted, Unable to backup
@@ -102,7 +102,7 @@ fi
 rm -f $lock
 
 #send log entries to wasabi bucket for debugging later
-grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
+grep "WASABI DAILY BACKUP" /var/log/messages | aws --profile wasabi --region us-east-1 s3 cp - s3://{{ wasabi_bucket }}/daily-backup.log --endpoint-url=https://s3.wasabisys.com
 
 #Check Log for errors
 ERRORS=$(grep $now /var/log/messages | grep ERROR)
