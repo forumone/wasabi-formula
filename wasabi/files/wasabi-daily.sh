@@ -22,6 +22,12 @@ for E in ${EXCLUDES[@]}; do
 now=$(date +%F_%H-%M-%S)
 DOW=$(date +%a)
 
+# timestamp function
+# prints current timestamp in YYYY-MM-DD_HH-MM-SS when called
+timestamp() {
+  date +"%F_%H-%M-%S"
+}
+
 #creates a run function to drop exit codes on command failures
 function run {
     "$@"
@@ -76,12 +82,12 @@ if test -f "/mnt/ofs_snapshot/README"; then
   if [[ "$DOW" == "Sat" ]]; then
     for i in $(ls /mnt/ofs_snapshot/vhosts/); do
       if [[ "$i" != "healthcheck" ]]; then
-            logger -t wasabi tar backup of vhosts beginning at ${timestamp}
+            logger -t wasabi tar backup of vhosts beginning at $(timestamp)
             run tar czfP - /mnt/ofs_snapshot/vhosts/$i | aws --profile wasabi --region us-east-1 s3 cp - s3://{{ wasabi_bucket }}/vhosts-weekly/${i}-${timestamp}.tar.gz --endpoint-url=https://s3.wasabisys.com
             if [ "$?" -eq 0 ]; then
-                logger -t wasabi $i WASABI WEEKLY BACKUP SUCCESS up at ${timestamp}
+                logger -t wasabi $i WASABI WEEKLY BACKUP SUCCESS up at $(timestamp)
             else
-                logger -t wasabi $i WASABI WEEKLY BACKUP ERROR at ${timestamp}
+                logger -t wasabi $i WASABI WEEKLY BACKUP ERROR at $(timestamp)
                 fail
             fi
       fi
