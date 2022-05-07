@@ -79,7 +79,7 @@ fi
 #Mount snapshot and backup
 if test -f "/mnt/ofs_snapshot/README"; then
 #Do weekly tar archive on Saturdays
-  if [[ "$DOW" == "Sat" ]]; then
+  if [[ "$DOW" == "Fri" ]]; then
     for i in $(ls /mnt/ofs_snapshot/vhosts/); do
       if [[ "$i" != "healthcheck" ]]; then
             logger -t wasabi tar backup of vhosts beginning at $(timestamp)
